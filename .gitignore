@@ -1,0 +1,8 @@
+# Python virtual env
+venv/
+
+# Python bytecode
+__pycache__/
+
+# IDE and code editors
+.vscode/
