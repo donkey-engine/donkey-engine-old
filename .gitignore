@@ -6,3 +6,5 @@ __pycache__/
 
 # IDE and code editors
 .vscode/
+
+.pytest_cache/

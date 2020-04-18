@@ -2,3 +2,5 @@ aiohttp==3.6.2
 alembic==1.4.2
 gino==0.8.6
 psycopg2==2.8.5
+webargs==6.0.0
+marshmallow-sqlalchemy==0.22.3
