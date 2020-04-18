@@ -7,8 +7,8 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer(), primary_key=True)
-    username = db.Column(db.String(length=32))
-    password = db.Column(db.String())
+    username = db.Column(db.String(length=32), nullable=False)
+    password = db.Column(db.String(), nullable=False)
     email = db.Column(db.String(32))
 
     __table_args__ = (

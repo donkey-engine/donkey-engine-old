@@ -6,6 +6,7 @@ import subprocess
 import psycopg2
 
 from src import settings
+from src.db import db
 
 TEST_DB_NAME = f'test-{settings.DATABASE_NAME}'
 
@@ -33,9 +34,14 @@ def _apply_migrations():
 def create_db():
     """Create test database."""
     _execute_query(f'CREATE DATABASE "{TEST_DB_NAME}"')
+
+    # specify test database for gino
+    settings.DATABASE_NAME = TEST_DB_NAME
+
     _apply_migrations()
 
 
-def drop_db():
+async def drop_db():
     """Drop test database."""
+    await db.pop_bind().close()
     _execute_query(f'DROP DATABASE "{TEST_DB_NAME}"')

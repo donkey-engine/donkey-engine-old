@@ -3,6 +3,7 @@
 from aiohttp import web
 
 from src.db import init_db
+from src.router import routes
 
 
 async def on_startup(_):
@@ -10,11 +11,18 @@ async def on_startup(_):
     await init_db()
 
 
-if __name__ == "__main__":
+def create_app():
+    """Create application and setup it."""
     app = web.Application()
 
-    app.on_startup.append(on_startup)
+    app.add_routes(routes)
 
+    app.on_startup.append(on_startup)
+    return app
+
+
+if __name__ == "__main__":
+    app = create_app()
     web.run_app(
         app,
         port='8000',
