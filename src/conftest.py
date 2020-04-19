@@ -3,20 +3,34 @@
 import pytest
 
 from app import create_app
-from src.db_helper import create_db, drop_db
+from src.db_helper import create_db, drop_db, truncate_table
 
 
-@pytest.fixture
-async def db():
+@pytest.fixture(scope='session')
+def db():
     """Setup test database."""
-    create_db()
-    yield
-    await drop_db()
+    db = create_db()
+    yield db
+    drop_db()
 
 
 @pytest.fixture
-def client(aiohttp_client, loop, db):
+def transactional_db(db):
+    """
+    Fixture manage database's state.
+    Providing database without any data but with migrated tables.
+    """
+    yield db
+    for table in db.tables:
+        truncate_table(table)
+
+
+@pytest.fixture
+def client(aiohttp_client, loop, transactional_db):
     """Aiohttp test client instance."""
     app = create_app()
     client = aiohttp_client(app)
-    return loop.run_until_complete(client)
+
+    yield loop.run_until_complete(client)
+
+    loop.run_until_complete(transactional_db.pop_bind().close())

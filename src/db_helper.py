@@ -11,9 +11,9 @@ from src.db import db
 TEST_DB_NAME = f'test-{settings.DATABASE_NAME}'
 
 
-def _execute_query(query):
+def _execute_query(query, database='postgres'):
     """Execute sql in default postgresql database."""
-    with psycopg2.connect(database='postgres',
+    with psycopg2.connect(database=database,
                           user=settings.DATABASE_USER,
                           password=settings.DATABASE_PASS,
                           host=settings.DATABASE_HOST,
@@ -39,9 +39,14 @@ def create_db():
     settings.DATABASE_NAME = TEST_DB_NAME
 
     _apply_migrations()
+    return db
 
 
-async def drop_db():
+def drop_db():
     """Drop test database."""
-    await db.pop_bind().close()
     _execute_query(f'DROP DATABASE "{TEST_DB_NAME}"')
+
+
+def truncate_table(table):
+    """Truncate table in test database."""
+    _execute_query(f'TRUNCATE {table} RESTART IDENTITY', TEST_DB_NAME)
