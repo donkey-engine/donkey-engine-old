@@ -1,0 +1,246 @@
+swagger: "2.0"
+info:
+  description: "Game server builder and hosting"
+  version: "dev"
+  title: "Donkey Engine"
+  # termsOfService: "..."
+  contact:
+    email: "hello@donkey-engine.host"
+  # license:
+  #   name: "..."
+  #   url: "..."
+host: "donkey-engine.host"
+basePath: "/api"
+tags:
+- name: "auth"
+  description: "Auth, registration and user data"
+- name: "games"
+  description: "Supported games information"
+- name: "servers"
+  description: "Work with user owned servers"
+schemes:
+- "https"
+- "http"
+paths:
+  /users/auth/sign_up:
+    post:
+      tags:
+      - auth
+      description: User registration
+      parameters:
+      - name: User data
+        in: body
+        schema:
+          properties:
+            username:
+              type: string
+              example: 'admin'
+            password:
+              type: string
+              example: 'qwerty12+'
+      responses:
+        200:
+          description: Successful registration
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+        400:
+          description: Registration error
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - error
+              message:
+                type: string
+                enum:
+                - Username is already registered
+
+  /users/auth/sign_in:
+    post:
+      tags:
+      - auth
+      description: User auth and getting token
+      parameters:
+      - name: User data
+        in: body
+        schema:
+          properties:
+            username:
+              type: string
+              example: 'admin'
+            password:
+              type: string
+              example: 'qwerty12+'
+      responses:
+        200:
+          description: Successful auth
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+              token:
+                type: string
+        400:
+          description: Auth errors
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - error
+              message:
+                type: string
+                enum:
+                - Wrong username or password
+
+  /games:
+    get:
+      tags:
+      - games
+      description: Get games list
+      parameters:
+        - name: Authorization
+          in: header
+          type: string
+          required: true
+          description: Auth token
+      responses:
+        200:
+          description: Successful request
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Game'
+
+  /servers:
+    get:
+      tags:
+      - servers
+      description: Get user owned servers
+      parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: Auth token
+      responses:
+        200:
+          description: Successful request
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+              results:
+                type: array
+                items:
+                  $ref: '#/definitions/Server'
+    post:
+      tags:
+      - servers
+      description: Create new server
+      parameters:
+      - name: Authorization
+        in: header
+        type: string
+        required: true
+        description: Auth token
+      - name: request body
+        in: body
+        schema:
+          properties:
+            id:
+              type: number
+              description: ID of the game
+      responses:
+        200:
+          description: Server successfully created
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+
+  /servers/{id}:
+    get:
+      tags:
+      - servers
+      description: Get info about specific game server
+      parameters:
+      - name: id
+        in: path
+        description: Server id
+        required: true
+        type: number
+      responses:
+        200:
+          description: Successful request
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+              results:
+                $ref: '#/definitions/Server'
+    delete:
+      tags:
+      - servers
+      description: Remove game server
+      parameters:
+      - name: id
+        in: path
+        required: true
+        type: number
+      responses:
+        200:
+          description: Successful removing
+          schema:
+            properties:
+              status:
+                type: string
+                enum:
+                - success
+
+definitions:
+  Game:
+    title: Game object
+    properties:
+      id:
+        type: number
+      name:
+        type: string
+        example: "Minecraft"
+      version:
+        type: string
+        example: "1.2.5"
+
+  Server:
+    title: Server object
+    properties:
+      id:
+        type: number
+      game:
+        $ref: '#/definitions/Game'
+      url:
+        type: string
+        description: URL to game server
+        example: "https://www.domain.com/"
+      running:
+        type: boolean
+        description: Is server available now
