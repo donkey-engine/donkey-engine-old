@@ -1,6 +1,20 @@
 """Set of tests for user application."""
 
+from unittest import mock
+
+import pytest
+from aiohttp import web
+
 from src.user.models import User
+from src.user.hash import hash_password
+
+
+@pytest.fixture
+async def registered_user():
+    hashed_password = hash_password('******')
+    user = await User.create(username='donkey-user',
+                             password=hashed_password)
+    return user
 
 
 class TestSignUp:
@@ -33,3 +47,58 @@ class TestSignUp:
         ).gino.first()
 
         assert user.password != self.post_data['password']
+
+
+class TestSignIn:
+
+    path = '/users/auth/sign_in'
+
+    async def test_user_not_found(self, client):
+        credentials = {'username': 'does_not_exist', 'password': '******'}
+        response = await client.post(self.path, json=credentials)
+
+        assert response.status == 404
+        assert response.reason == 'User not found'
+
+    async def test_successful_sign_in(self, client, registered_user):
+        credentials = {'username': 'donkey-user', 'password': '******'}
+        response = await client.post(self.path, json=credentials)
+
+        assert response.status == 200
+        assert 'token' in (await response.json())
+
+
+class TestJWTMiddleware:
+
+    path = '/test-middleware'
+
+    @pytest.fixture(autouse=True)
+    def token_handler(self, client):
+        async def handler(request):
+            return web.Response()
+
+        # aiohttp doesn't handle dynamic route definition
+        with mock.patch.object(client.app.router, '_frozen', False):
+            client.app.router.add_get(self.path, handler)
+
+    async def test_missing_token(self, client):
+        response = await client.get(self.path)
+
+        assert response.status == 401
+        assert response.reason == 'Missing authorization token'
+
+    async def test_valid_token(self, client, registered_user):
+        credentials = {'username': 'donkey-user', 'password': '******'}
+        response = await client.post('/users/auth/sign_in', json=credentials)
+        token = (await response.json())['token']
+
+        headers = {'Authorization': f'Bearer {token}'}
+        response = await client.get(self.path, headers=headers)
+        assert response.status == 200
+
+    async def test_wrong_token(self, client):
+        headers = {'Authorization': 'Bearer wrong_token'}
+        response = await client.get(self.path, headers=headers)
+
+        assert response.status == 401
+        assert response.reason == 'Invalid authorization token'

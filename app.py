@@ -4,6 +4,7 @@ from aiohttp import web
 
 from src.db import init_db
 from src.router import routes
+from src.user.middlewares import jwt_middleware
 
 
 async def on_startup(_):
@@ -13,7 +14,9 @@ async def on_startup(_):
 
 def create_app():
     """Create application and setup it."""
-    app = web.Application()
+    app = web.Application(
+        middlewares=[jwt_middleware]
+    )
 
     app.add_routes(routes)
 
