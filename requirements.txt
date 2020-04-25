@@ -4,3 +4,4 @@ gino==0.8.6
 psycopg2==2.8.5
 webargs==6.0.0
 marshmallow-sqlalchemy==0.22.3
+pyjwt==1.7.1
