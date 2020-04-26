@@ -1,6 +1,7 @@
 """Database connection module."""
 
 from gino import Gino
+from sqlalchemy.dialects.postgresql import insert
 
 from src import settings
 
@@ -22,3 +23,23 @@ async def init_db():
     """Init database connection."""
     url = gen_postgres_url()
     await db.set_bind(url)
+
+
+async def bulk_create(model, items):
+    """Perform mutiple insert."""
+    table = model.__table__
+    inserted = await insert(table) \
+        .values(items) \
+        .returning(table) \
+        .gino \
+        .all()
+
+    columns = table.columns.keys()
+    result = []
+    for item in inserted:
+        # from tuple to dict
+        normalized = {column: item[index]
+                      for index, column in enumerate(columns)}
+        result.append(normalized)
+
+    return result

@@ -6,15 +6,6 @@ import pytest
 from aiohttp import web
 
 from src.user.models import User
-from src.user.hash import hash_password
-
-
-@pytest.fixture
-async def registered_user():
-    hashed_password = hash_password('******')
-    user = await User.create(username='donkey-user',
-                             password=hashed_password)
-    return user
 
 
 class TestSignUp:
