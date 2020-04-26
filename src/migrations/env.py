@@ -5,14 +5,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from src.db import gen_postgres_url
-from src.user.models import User
+from src.db import gen_postgres_url, db
 
 config = context.config
 fileConfig(config.config_file_name)
-target_metadata = [
-    User.__metadata__,
-]
+target_metadata = db
 
 
 def run_migrations_offline():
@@ -41,6 +38,11 @@ def run_migrations_online():
     In this scenario we need to create an Engine
     and associate a connection with the context.
     """
+
+    # Alembic require model runtime definition
+    from src.game.models import Game  # noqa F401
+    from src.user.models import User  # noqa F401
+
     configuration = {
         'sqlalchemy.url': gen_postgres_url(),
     }
