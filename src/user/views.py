@@ -15,7 +15,7 @@ async def sign_up(request, username, password):
     """Handler for sign up."""
     user_exist = await User.query.where(User.username == username).gino.all()
     if user_exist:
-        return web.json_response({'username': 'already registered'})
+        raise web.HTTPBadRequest(reason='Username is already registered')
 
     hashed_password = hash_password(password)
     await User.create(username=username, password=hashed_password)
