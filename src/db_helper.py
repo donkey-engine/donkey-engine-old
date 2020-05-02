@@ -49,4 +49,4 @@ def drop_db():
 
 def truncate_table(table):
     """Truncate table in test database."""
-    _execute_query(f'TRUNCATE {table} RESTART IDENTITY', TEST_DB_NAME)
+    _execute_query(f'TRUNCATE {table} RESTART IDENTITY CASCADE', TEST_DB_NAME)
