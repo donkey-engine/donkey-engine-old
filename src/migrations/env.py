@@ -42,6 +42,7 @@ def run_migrations_online():
     # Alembic require model runtime definition
     from src.game.models import Game  # noqa F401
     from src.user.models import User  # noqa F401
+    from src.server.models import Server  # noqa F401
 
     configuration = {
         'sqlalchemy.url': gen_postgres_url(),

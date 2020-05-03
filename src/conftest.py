@@ -12,6 +12,7 @@ from src.db import bulk_create
 from src.test_utils import TestClient
 from src.user.hash import hash_password
 from src.user.models import User
+from src.server.models import Server
 
 
 @pytest.fixture(scope='session')
@@ -100,3 +101,20 @@ async def games():
 
     games = await bulk_create(Game, data)
     return namedtuple('Games', 'game1 game2')(*games)
+
+
+@pytest.fixture
+async def servers(games, registered_user):
+    data = (
+        {
+            'game': games.game1['id'],
+            'user': registered_user.id
+        },
+        {
+            'game': games.game2['id'],
+            'user': registered_user.id
+        },
+    )
+
+    servers = await bulk_create(Server, data)
+    return namedtuple('Servers', 'server1 server2')(*servers)

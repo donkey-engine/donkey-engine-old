@@ -27,9 +27,11 @@ async def jwt_middleware(request, handler):
             raise web.HTTPForbidden(reason='Invalid authorization header')
 
         try:
-            jwt.decode(token, settings.SECRET_KEY)
+            decoded = jwt.decode(token, settings.SECRET_KEY)
         except jwt.InvalidTokenError:
             raise web.HTTPUnauthorized(reason='Invalid authorization token')
+
+        request['payload'] = decoded
 
     response = await handler(request)
     return response
