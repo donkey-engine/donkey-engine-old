@@ -11,11 +11,18 @@ allow_without_token = (
 )
 
 
+def request_in_whitelist(request):
+    """Check is request in whitelist."""
+    for path in allow_without_token:
+        if path in request.path:
+            return True
+
+
 @web.middleware
 async def jwt_middleware(request, handler):
     """Middleware checks token validity."""
 
-    if request.path not in allow_without_token:
+    if not request_in_whitelist(request):
         try:
             header = request.headers['Authorization']
         except KeyError:
