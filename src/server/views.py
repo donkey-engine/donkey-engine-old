@@ -1,8 +1,8 @@
 """Module for application's views."""
 
 from aiohttp import web
-from webargs.aiohttpparser import use_kwargs
 
+from src.parser import use_kwargs
 from src.server.models import Server
 from src.server.schemas import ServerSchema
 

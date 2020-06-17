@@ -19,9 +19,9 @@ class TestSignUp:
     async def test_empty_credentials(self, client):
         data = dict(username='', password='')
         response = await client.post(self.path, json=data)
-        errors = (await response.json())['json']
+        errors = await response.json()
 
-        assert response.status == 422
+        assert response.status == 400
         assert len(errors) == 2
         assert 'username' in errors
         assert 'password' in errors
@@ -39,6 +39,16 @@ class TestSignUp:
 
         assert user.password != self.post_data['password']
 
+    async def test_user_exist(self, client, registered_user):
+        registered_user_data = {
+            'username': registered_user.username,
+            'password': 'qwerty12+'
+        }
+
+        response = await client.post(self.path, json=registered_user_data)
+        errors = await response.json()
+        assert errors['username'] == 'Username is already registered'
+
 
 class TestSignIn:
 
@@ -49,7 +59,7 @@ class TestSignIn:
         response = await client.post(self.path, json=credentials)
 
         assert response.status == 404
-        assert response.reason == 'User not found'
+        assert (await response.json())['username'] == 'User not found'
 
     async def test_successful_sign_in(self, client, registered_user):
         credentials = {'username': 'donkey-user', 'password': '******'}
