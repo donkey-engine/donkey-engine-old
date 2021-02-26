@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 alembic==1.4.2
 gino==0.8.6
 psycopg2==2.8.5
